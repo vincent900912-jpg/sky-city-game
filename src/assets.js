@@ -46,10 +46,6 @@ export const MANIFEST = {
     phase: frames('assets/fx/boss/phase_change', 'phase_change', 4, false),
   },
   parallax: Object.fromEntries(['sky', 'far-bg', 'mid-bg', 'near-bg', 'foreground-overlay'].map((name) => [name, image(`assets/levels/level_01_cloud_gate/parallax-hires/${name}.png`, name !== 'foreground-overlay')])),
-  opening: Object.fromEntries([
-    ['prosperity', '01-sereon-prosperity.png'], ['silentDay', '02-silent-day.png'], ['centuriesLater', '03-centuries-later.png'],
-    ['navigationChip', '04-navigation-chip.png'], ['departure', '05-departure.png'], ['cloudReveal', '06-cloud-reveal.png'],
-  ].map(([key, file]) => [key, image(`assets/opening/${file}`)])),
   objects: Object.fromEntries(Object.entries({
     stone_platform: 'platforms/stone_platform.png', thin_platform: 'platforms/thin_platform.png', moving_platform: 'platforms/moving_platform.png', stone_wall: 'platforms/stone_wall.png', boss_arena_platform: 'platforms/boss_arena_platform.png',
     wind_ring: 'interactives/wind_ring.png', rusted_gear_door: 'interactives/rusted_gear_door.png', checkpoint: 'interactives/checkpoint.png', boss_room_door: 'interactives/boss_room_door.png',
