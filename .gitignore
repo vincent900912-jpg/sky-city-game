@@ -1,0 +1,19 @@
+.codex-tmp/
+__pycache__/
+*.py[cod]
+.DS_Store
+Thumbs.db
+node_modules/
+.vscode/
+.idea/
+*.log
+
+# Asset-generation sources and previews are not required at runtime.
+**/raw-sheet*.png
+**/*-raw.png
+**/animation-atlas-raw.png
+**/pipeline-meta.json
+**/preview.gif
+**/animation.gif
+assets/levels/level_01_cloud_gate/reference/sources/
+assets/levels/level_01_cloud_gate/previews/

@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "name": "chengyu",
+  "processing": {
+    "cell_size": 128,
+    "fit_scale": 0.625,
+    "trim_border": 4,
+    "edge_clean_depth": 3,
+    "align": "feet",
+    "shared_scale": true,
+    "scale_strategy": "preserve",
+    "component_mode": "all",
+    "component_padding": 0,
+    "min_component_area": 1,
+    "edge_touch_margin": 0
+  },
+  "output_origin": [
+    64.0,
+    104
+  ],
+  "reference": {
+    "target": "player",
+    "mode": "idle",
+    "rows": 1,
+    "cols": 1,
+    "body_scale_mean": 0.40927044713844957,
+    "body_scale_cv": 0.0,
+    "anchor_y_mean": 0.8766140602582496
+  },
+  "qc": {
+    "max_body_scale_drift": 0.1
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "player": {
+    "slash_arc": { "cell": 128, "frames": 4, "loop": false },
+    "wind_pulse_projectile": { "cell": 96, "frames": 4, "loop": true }
+  },
+  "common": {
+    "hit_spark": { "cell": 64, "frames": 4, "loop": false },
+    "small_impact": { "cell": 64, "frames": 4, "loop": false },
+    "reflect_hint": { "cell": 64, "frames": 4, "loop": true },
+    "enemy_death_burst": { "cell": 96, "frames": 4, "loop": false }
+  },
+  "boss": {
+    "ring_blade": { "cell": 128, "frames": 4, "loop": true },
+    "wind_bullet": { "cell": 96, "frames": 4, "loop": true },
+    "scan_beam": { "cell": 192, "frames": 4, "loop": false, "frame_0_is_warning": true },
+    "dash": { "cell": 128, "frames": 4, "loop": false },
+    "phase_change": { "cell": 192, "frames": 4, "loop": false }
+  }
+}

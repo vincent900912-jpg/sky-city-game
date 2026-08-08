@@ -1,0 +1,27 @@
+{
+  "id": "level_01_cloud_gate",
+  "display_name": "雲門階庭",
+  "map_mode": "side_scroll_mode",
+  "logical_viewport": { "width": 384, "height": 216 },
+  "world_bounds": { "x": 0, "y": 0, "width": 1152, "height": 216 },
+  "coordinate_system": "top_left_pixels",
+  "segments": [
+    { "id": "approach", "x": 0, "width": 384, "purpose": "movement_and_scout_tutorial" },
+    { "id": "courtyard", "x": 384, "width": 384, "purpose": "guard_flank_and_environment_tutorial" },
+    { "id": "boss_room", "x": 768, "width": 384, "purpose": "oro_boss_arena" }
+  ],
+  "parallax": [
+    { "id": "sky", "asset": "../parallax/sky.png", "factor": 0.0, "opaque": true },
+    { "id": "far-bg", "asset": "../parallax/far-bg.png", "factor": 0.12, "opaque": true },
+    { "id": "mid-bg", "asset": "../parallax/mid-bg.png", "factor": 0.28, "opaque": false },
+    { "id": "near-bg", "asset": "../parallax/near-bg.png", "factor": 0.52, "opaque": false },
+    { "id": "foreground-overlay", "asset": "../parallax/foreground-overlay.png", "factor": 1.15, "opaque": false, "optional": true }
+  ],
+  "data_contract": {
+    "visuals_are_non_colliding": true,
+    "collision_source": "collision.json",
+    "object_source": "objects.json",
+    "event_source": "scene-hooks.json",
+    "pixel_collision_forbidden": true
+  }
+}

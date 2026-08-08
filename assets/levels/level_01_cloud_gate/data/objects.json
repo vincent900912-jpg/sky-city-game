@@ -1,0 +1,31 @@
+{
+  "player_spawn": { "id": "player_start", "x": 36, "y": 184, "facing": "right" },
+  "enemy_spawns": [
+    { "id": "scout_01", "enemy": "wind_scout_bug", "x": 210, "y": 128, "patrol": { "left": 168, "right": 276 } },
+    { "id": "scout_02", "enemy": "wind_scout_bug", "x": 438, "y": 112, "patrol": { "left": 410, "right": 482 } },
+    { "id": "guard_01", "enemy": "courtyard_guard", "x": 556, "y": 184, "facing": "left", "charge_wall_id": "wall_guard_stop" },
+    { "id": "guard_02", "enemy": "courtyard_guard", "x": 686, "y": 184, "facing": "right", "charge_wall_id": "gear_door_blocker" },
+    { "id": "oro", "enemy": "oro", "x": 1000, "y": 136, "facing": "left", "active_on": "boss_start" }
+  ],
+  "interactives": [
+    { "id": "checkpoint_01", "type": "checkpoint", "asset": "../objects/interactives/checkpoint.png", "x": 340, "y": 104, "width": 64, "height": 80, "respawn": { "x": 358, "y": 184 } },
+    { "id": "checkpoint_boss", "type": "checkpoint", "asset": "../objects/decorations/small_flag.png", "x": 786, "y": 72, "width": 72, "height": 104, "respawn": { "x": 830, "y": 176 } },
+    { "id": "wind_ring_01", "type": "wind_ring", "asset": "../objects/interactives/wind_ring.png", "x": 478, "y": 104, "width": 64, "height": 64, "launch": { "vx": 70, "vy": -150 } },
+    { "id": "gear_door_blocker", "type": "rusted_gear_door", "asset": "../objects/interactives/rusted_gear_door.png", "x": 680, "y": 88, "width": 96, "height": 96, "opens_on": "courtyard_clear" },
+    { "id": "boss_room_door", "type": "boss_room_door", "asset": "../objects/interactives/boss_room_door.png", "x": 714, "y": 40, "width": 96, "height": 136, "closes_on": "boss_start", "opens_on": "boss_defeated" }
+  ],
+  "platform_visuals": [
+    { "id": "approach_floor", "asset": "../objects/platforms/stone_platform.png", "x": 0, "y": 184, "width": 300, "height": 64 },
+    { "id": "courtyard_floor", "asset": "../objects/platforms/stone_platform.png", "x": 340, "y": 184, "width": 380, "height": 64 },
+    { "id": "thin_01", "asset": "../objects/platforms/thin_platform.png", "x": 126, "y": 144, "width": 174, "height": 16 },
+    { "id": "thin_02", "asset": "../objects/platforms/thin_platform.png", "x": 592, "y": 122, "width": 128, "height": 16 },
+    { "id": "moving_01", "asset": "../objects/platforms/moving_platform.png", "x": 418, "y": 148, "width": 144, "height": 48, "motion": { "axis": "y", "min": 112, "max": 148, "speed": 18 } },
+    { "id": "wall_guard_stop", "asset": "../objects/platforms/stone_wall.png", "x": 640, "y": 120, "width": 24, "height": 64 },
+    { "id": "boss_floor", "asset": "../objects/platforms/boss_arena_platform.png", "x": 768, "y": 176, "width": 384, "height": 80 }
+  ],
+  "decorations": [
+    { "asset": "../objects/decorations/cloud_grass.png", "x": 218, "y": 136, "alpha": 0.72, "collision": "none" },
+    { "asset": "../objects/decorations/weather_vane.png", "x": 470, "y": 72, "alpha": 0.48, "collision": "none" }
+  ],
+  "level_exit": { "id": "exit_01", "x": 1120, "y": 128, "enabled_on": "boss_defeated" }
+}

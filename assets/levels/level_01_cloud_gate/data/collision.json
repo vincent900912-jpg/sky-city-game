@@ -1,0 +1,25 @@
+{
+  "coordinate_system": "top_left_pixels",
+  "solids": [
+    { "id": "floor_approach_a", "shape": "rect", "x": 0, "y": 184, "w": 300, "h": 32 },
+    { "id": "floor_approach_b", "shape": "rect", "x": 340, "y": 184, "w": 380, "h": 32 },
+    { "id": "wall_guard_stop", "shape": "rect", "x": 640, "y": 120, "w": 24, "h": 64 },
+    { "id": "boss_floor", "shape": "rect", "x": 768, "y": 176, "w": 384, "h": 40 },
+    { "id": "boss_left_wall", "shape": "rect", "x": 752, "y": 0, "w": 16, "h": 176 },
+    { "id": "boss_right_wall", "shape": "rect", "x": 1136, "y": 0, "w": 16, "h": 176 }
+  ],
+  "one_way_platforms": [
+    { "id": "thin_01", "shape": "rect", "x": 126, "y": 144, "w": 174, "h": 8 },
+    { "id": "thin_02", "shape": "rect", "x": 592, "y": 122, "w": 128, "h": 8 },
+    { "id": "moving_01", "shape": "rect", "x": 418, "y": 148, "w": 144, "h": 10, "dynamic": true }
+  ],
+  "doors": [
+    { "id": "gear_door_blocker", "shape": "rect", "x": 704, "y": 101, "w": 48, "h": 83, "enabled_until": "courtyard_clear" },
+    { "id": "boss_room_door", "shape": "rect", "x": 752, "y": 84, "w": 20, "h": 92, "enabled_during": "boss_active" }
+  ],
+  "hazards": [
+    { "id": "gap_01", "type": "fall", "shape": "rect", "x": 300, "y": 184, "w": 40, "h": 32 },
+    { "id": "under_courtyard", "type": "fall", "shape": "rect", "x": 720, "y": 184, "w": 48, "h": 32 },
+    { "id": "world_kill_plane", "type": "kill", "shape": "rect", "x": 0, "y": 214, "w": 1152, "h": 2 }
+  ]
+}

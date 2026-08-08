@@ -1,0 +1,8 @@
+Use case: identity-preserve
+Asset type: canonical identity master for a production side-view pixel-art game sprite
+Reference role: preserve the accepted first draft's face, short deep-navy hair, amber goggles, white/teal palette, leather armor, boots, weapon, proportions, and pixel-art rendering.
+Subject: Chengyu, a 17-year-old sky-ruin explorer. Right-facing side profile. Short deep navy hair, amber goggles, compact white-and-teal short cape, lightweight warm-brown leather armor, tall boots with gold wind motifs, compact cyan Refraction Blade held close to the body, and exactly two matching small teal-white-gold Wing Ring fins hovering close behind the upper back.
+Style: high-quality crisp handcrafted pixel art, modern Japanese-animation-inspired adventure atmosphere, original design, chibi but not childlike, about 1:3.5 to 1:4 head-to-body ratio, deliberate pixel clusters, consistent pixel density, no painterly blur.
+Composition: one full-body grounded neutral ready stance, centered, boots on one horizontal baseline, generous padding.
+Background: perfectly flat solid #FF00FF chroma key.
+Constraints: one character only; no grid; no text; no UI; no border; no shadow; no floor; no scenery; no detached FX; every part fully contained.

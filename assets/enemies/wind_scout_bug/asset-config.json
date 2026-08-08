@@ -1,0 +1,21 @@
+{
+  "name": "wind_scout_bug",
+  "facing": "right",
+  "body": {
+    "cell_size": [96, 96],
+    "anchor": [48, 76],
+    "content_baseline_y": 72,
+    "hover_clearance_px": 4
+  },
+  "attack": {
+    "projectile_spawn_frame_zero_based": 4,
+    "projectile_spawn_frame_human": 5,
+    "eye_socket": [68, 58]
+  },
+  "projectile": {
+    "cell_size": [64, 64],
+    "anchor": [32, 32],
+    "loop": true,
+    "impact_included": false
+  }
+}

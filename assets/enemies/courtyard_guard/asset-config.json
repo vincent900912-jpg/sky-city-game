@@ -1,0 +1,19 @@
+{
+  "id": "courtyard_guard",
+  "display_name": "階庭守衛偶",
+  "facing": "right",
+  "flip_for_left": true,
+  "cell": { "width": 128, "height": 128 },
+  "anchor": { "x": 64, "y": 104 },
+  "world_scale_reference": "assets/player/chengyu",
+  "animations": {
+    "idle": { "frames": 4, "fps": 7, "loop": true },
+    "walk": { "frames": 6, "fps": 10, "loop": true },
+    "guard": { "frames": 4, "fps": 8, "loop": true },
+    "turn": { "frames": 4, "fps": 10, "loop": false },
+    "charge_attack": { "frames": 6, "fps": 12, "loop": false, "warning_frame": 1, "active_frames": [3, 4] },
+    "stunned": { "frames": 4, "fps": 7, "loop": true },
+    "hurt": { "frames": 4, "fps": 12, "loop": false },
+    "death": { "frames": 6, "fps": 9, "loop": false }
+  }
+}

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="theme-color" content="#63cbed">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles/game.css">
+  <title>蒼穹遺都：核心迴響</title>
+</head>
+<body>
+  <main id="app" aria-label="蒼穹遺都：核心迴響">
+    <div id="game-shell">
+      <canvas id="game" width="960" height="540" aria-label="遊戲畫面"></canvas>
+      <div id="opening-screen" class="flow-screen" aria-label="遊戲 Opening">
+        <div class="opening-backdrop"></div><div class="opening-cloud cloud-a"></div><div class="opening-cloud cloud-b"></div><div class="opening-core"></div>
+        <div class="opening-logo"><span>蒼穹遺都</span><strong>核心迴響</strong><small>Echoes of the Celestial Core</small></div>
+        <div class="opening-skip">點擊或按任意鍵跳過</div>
+      </div>
+      <div id="main-menu" class="flow-screen" aria-label="主選單" hidden>
+        <div class="menu-backdrop"></div><div class="menu-haze haze-a"></div><div class="menu-haze haze-b"></div><div class="menu-particles" aria-hidden="true"></div>
+        <section class="menu-card">
+          <div class="menu-emblem">✦</div><p class="menu-kicker">天空遺跡探索記</p><h1>蒼穹遺都<small>核心迴響</small></h1>
+          <nav class="menu-actions">
+            <button data-flow="new-game">開始遊戲</button><button id="continue-button" data-flow="continue">繼續遊戲</button>
+            <button data-flow="help">遊戲說明</button><button data-flow="settings">設定</button>
+          </nav>
+          <p id="menu-save-note" class="menu-note"></p>
+        </section>
+      </div>
+      <div id="story-screen" class="flow-screen" aria-label="序章" hidden>
+        <img id="story-art" alt="序章插畫"><div class="story-pan"></div><div class="story-vignette"></div>
+        <button id="story-skip" class="story-skip">跳過序章</button>
+        <section class="story-caption"><div class="story-meta"><span id="story-scene-number"></span><span id="story-progress"></span></div><h2 id="story-title"></h2><p id="story-text"></p><button id="story-next">下一段</button></section>
+      </div>
+      <div id="chapter-card" class="flow-screen chapter-card" hidden><span>第一章</span><strong>雲門階庭</strong></div>
+      <div id="fade-transition" aria-hidden="true"></div>
+      <div id="hud" aria-label="遊戲介面" hidden>
+        <section id="player-hud" class="hud-card">
+          <div id="health" aria-label="生命值"></div>
+          <div class="energy-row"><div id="energy-bar"><i></i></div><span id="energy-value">100 / 100</span></div>
+        </section>
+        <section id="meta-hud" class="hud-card">
+          <div id="core-count">核心碎片 0</div>
+          <div class="hud-actions"><button id="help-button" class="icon-button" aria-label="操作說明">?</button><button id="settings-button" class="icon-button" aria-label="按鍵設定">⚙</button></div>
+        </section>
+        <section id="boss-hud" class="hud-card" hidden>
+          <div class="boss-heading"><strong>天門守機「奧羅」</strong><span id="boss-phase">Phase 1</span></div>
+          <div id="boss-health"><i></i></div>
+        </section>
+        <div id="enemy-bars" aria-label="敵人生命值"></div>
+        <div id="toast" role="status" hidden></div>
+        <pre id="debug-info" hidden></pre>
+      </div>
+      <div id="loading" class="panel active"><h1>雲門階庭</h1><p id="loading-text">正在準備天空航路…</p></div>
+      <div id="error" class="panel"><h2>素材載入失敗</h2><pre id="error-text"></pre></div>
+      <div id="pause" class="panel"><h2>暫停</h2><button data-command="resume">繼續</button><button data-command="restart">從檢查點重來</button><button data-command="main-menu">返回主選單</button></div>
+      <div id="help" class="panel modal-panel"><div class="modal-card help-card"><h2>遊戲說明</h2><div class="help-summary"><p><strong>目標</strong>探索雲門階庭、收集能量並擊敗天門守機「奧羅」。</p><p><strong>Checkpoint</strong>接觸檢查點會自動保存；墜落或重試時由最近檢查點返回。</p><p><strong>戰鬥</strong>觀察敵人預兆、反彈風彈、繞到盾牌守衛背後，最後擊敗 Boss。</p><p><strong>儲存</strong>關卡進度、能力、設定與鍵位會保存在瀏覽器 localStorage。</p></div><div id="help-bindings" class="binding-list"></div><button data-command="close-overlay">返回</button></div></div>
+      <div id="settings" class="panel modal-panel"><div class="modal-card settings-card"><h2>按鍵設定</h2><div id="binding-message" role="status"></div><div id="settings-bindings" class="binding-list"></div><div class="modal-actions"><button data-command="reset-bindings">恢復預設按鍵</button><button data-command="close-overlay">返回</button></div></div></div>
+      <div id="confirm" class="panel modal-panel"><div class="modal-card confirm-card"><h2 id="confirm-title"></h2><p id="confirm-text"></p><div class="modal-actions"><button id="confirm-cancel">取消</button><button id="confirm-accept">確認</button></div></div></div>
+      <div id="game-over" class="panel"><h2>探索者倒下了</h2><button data-command="retry">從檢查點重來</button><button data-command="main-menu">返回主選單</button></div>
+      <div id="victory" class="panel"><h2>雲門階庭完成</h2><p>取得第一枚權限片<br><strong>「回風斬」</strong> 資料已解鎖</p><div id="victory-stats"></div><button data-command="replay">重新挑戰</button><button data-command="main-menu">返回主選單</button></div>
+      <div id="rotate"><div>↻</div><p>請旋轉裝置<br><small>本遊戲需使用橫向畫面</small></p></div>
+      <div id="touch-controls" aria-label="觸控操作">
+        <div class="touch-left"><button data-action="left" aria-label="向左">◀</button><button data-action="right" aria-label="向右">▶</button></div>
+        <div class="touch-right"><button data-action="attack" aria-label="攻擊">斬</button><button data-action="jump" class="primary" aria-label="跳躍">跳</button><button data-action="dash" aria-label="空中衝刺">衝</button><button data-action="skill" aria-label="特殊技能">技</button></div>
+      </div>
+    </div>
+  </main>
+  <script type="module" src="src/game.js"></script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "triggers": [
+    { "id": "checkpoint_reached", "checkpointId": "checkpoint_01", "shape": "rect", "x": 330, "y": 96, "w": 74, "h": 88, "event": "save_checkpoint_01" },
+    { "id": "boss_checkpoint_reached", "checkpointId": "checkpoint_boss", "shape": "rect", "x": 780, "y": 68, "w": 78, "h": 108, "event": "save_checkpoint_boss" },
+    { "id": "courtyard_combat", "shape": "rect", "x": 392, "y": 40, "w": 336, "h": 144, "event": "activate_courtyard_enemies" },
+    { "id": "boss_start", "shape": "rect", "x": 860, "y": 24, "w": 42, "h": 152, "event": "lock_room_and_activate_oro", "once": true },
+    { "id": "level_exit", "shape": "rect", "x": 1110, "y": 112, "w": 32, "h": 64, "event": "complete_level", "requires": "boss_defeated" }
+  ],
+  "boss_logic": {
+    "boss_id": "oro",
+    "phase_2_threshold": 0.5,
+    "phase_change_event": "oro_phase_change",
+    "platform_break_event": "boss_platform_partial_break",
+    "counter_window": "rear_core_open",
+    "victory_event": "boss_defeated"
+  },
+  "camera_zones": [
+    { "id": "approach_camera", "x": 0, "y": 0, "w": 768, "h": 216, "mode": "side_scroll" },
+    { "id": "boss_camera", "x": 768, "y": 0, "w": 384, "h": 216, "mode": "locked_arena" }
+  ]
+}

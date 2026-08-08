@@ -1,0 +1,22 @@
+{
+  "id": "oro",
+  "display_name": "天門守機「奧羅」",
+  "facing": "right",
+  "flip_for_left": true,
+  "cell": { "width": 192, "height": 192 },
+  "anchor": { "x": 96, "y": 164 },
+  "phase_2_hp_threshold": 0.5,
+  "animations": {
+    "idle": { "frames": 4, "fps": 6, "loop": true },
+    "core_closed": { "frames": 4, "fps": 7, "loop": true },
+    "core_open": { "frames": 4, "fps": 8, "loop": true, "vulnerable": true },
+    "ring_blade_attack": { "frames": 6, "fps": 10, "loop": false, "spawn_frame": 3 },
+    "wind_bullet_attack": { "frames": 6, "fps": 10, "loop": false, "spawn_frames": [2, 3, 4] },
+    "scan_beam": { "frames": 6, "fps": 10, "loop": false, "warning_frames": [0, 1], "active_frames": [3, 4] },
+    "dash": { "frames": 6, "fps": 12, "loop": false, "active_frames": [2, 3, 4] },
+    "phase_change": { "frames": 6, "fps": 8, "loop": false },
+    "hurt": { "frames": 4, "fps": 12, "loop": false },
+    "death": { "frames": 8, "fps": 8, "loop": false }
+  },
+  "detached_assets_root": "attacks"
+}
