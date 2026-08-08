@@ -79,10 +79,8 @@ export class OroBoss {
     drawAnchored(ctx, game.assets.boss.master, this.x, bodyY, game.cameraX, 96, 164, this.facing, (this.invulnerable > 0 ? 0.58 : 1) * fade, false, BOSS_SCALE, bodyRotation);
     const core = this.corePoint(); const sx = Math.round(core.x - game.cameraX); const sy = Math.round(core.y + bob);
     ctx.save();
-    if (this.state === 'core_open' || this.state === 'phase_change') {
+    if (!this.dead && (this.state === 'core_open' || this.state === 'phase_change')) {
       const radius = 8 + Math.sin(game.time * 10) * 2; const glow = ctx.createRadialGradient(sx, sy, 1, sx, sy, radius + 7); glow.addColorStop(0, '#efffff'); glow.addColorStop(.35, '#5ff4ffdd'); glow.addColorStop(1, '#23aee000'); ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(sx, sy, radius + 7, 0, Math.PI * 2); ctx.fill();
-    } else {
-      ctx.fillStyle = '#102d3bcc'; ctx.beginPath(); ctx.arc(sx, sy, 5, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = '#d7b65f'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(sx, sy, 5.5, 0, Math.PI * 2); ctx.stroke();
     }
     const warning = ['ring', 'bullets', 'beam', 'dash'].includes(this.state) && elapsed < 0.58;
     if (warning) {
