@@ -64,12 +64,21 @@ export async function loadAssets(onProgress = () => {}) {
   const entries = [];
   const walk = (node) => Object.values(node).forEach((value) => Array.isArray(value) ? value.forEach((item) => entries.push(item)) : value?.path ? entries.push(value) : walk(value));
   walk(MANIFEST);
-  await Promise.all(entries.map((entry, index) => new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => { loaded.set(entry.path, img); onProgress(index + 1, entries.length); resolve(); };
-    img.onerror = () => { const message = `${entry.critical ? '核心' : '選用'}素材不存在：${entry.path}`; console[entry.critical ? 'error' : 'warn'](`[assets] ${message}`); errors.push({ ...entry, message }); onProgress(index + 1, entries.length); resolve(); };
-    img.src = entry.path;
-  })));
+  let cursor = 0; let completed = 0;
+  const loadImage = (entry) => new Promise((resolve) => {
+    const img = new Image(); let attempt = 0;
+    const start = () => { attempt += 1; img.src = attempt === 1 ? entry.path : `${entry.path}?retry=${attempt}`; };
+    img.onload = () => { loaded.set(entry.path, img); resolve(); };
+    img.onerror = () => {
+      if (attempt < 3) { setTimeout(start, 180 * attempt); return; }
+      const message = `${entry.critical ? '核心' : '選用'}素材載入失敗：${entry.path}`; console[entry.critical ? 'error' : 'warn'](`[assets] ${message}`); errors.push({ ...entry, message }); resolve();
+    };
+    start();
+  });
+  const worker = async () => {
+    while (cursor < entries.length) { const entry = entries[cursor]; cursor += 1; await loadImage(entry); completed += 1; onProgress(completed, entries.length); }
+  };
+  await Promise.all(Array.from({ length: Math.min(12, entries.length) }, worker));
   const critical = errors.filter((entry) => entry.critical);
   if (critical.length) throw new Error(critical.map((entry) => entry.message).join('\n'));
   const resolve = (node) => Object.fromEntries(Object.entries(node).map(([key, value]) => [key, Array.isArray(value) ? value.map((entry) => loaded.get(entry.path)).filter(Boolean) : value?.path ? loaded.get(value.path) : resolve(value)]));
@@ -91,8 +100,13 @@ export async function loadLevelData() {
   const root = 'assets/levels/level_01_cloud_gate/data';
   const names = ['level-manifest', 'objects', 'collision', 'scene-hooks'];
   const values = await Promise.all(names.map(async (name) => {
-    const response = await fetch(`${root}/${name}.json`);
-    if (!response.ok) throw new Error(`關卡資料載入失敗：${name}.json (${response.status})`);
+    let response;
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+      response = await fetch(`${root}/${name}.json`, { cache: attempt === 1 ? 'default' : 'no-store' }).catch(() => null);
+      if (response?.ok) break;
+      await new Promise((resolve) => setTimeout(resolve, attempt * 180));
+    }
+    if (!response?.ok) throw new Error(`關卡資料載入失敗：${name}.json (${response?.status || 'network'})`);
     return response.json();
   }));
   return Object.fromEntries(names.map((name, index) => [name, values[index]]));
