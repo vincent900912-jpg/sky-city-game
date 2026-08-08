@@ -31,7 +31,6 @@ export const MANIFEST = {
   guard: Object.fromEntries(Object.entries({ idle: 4, walk: 6, guard: 4, turn: 4, charge_attack: 6, stunned: 4, hurt: 4, death: 6 }).map(([key, count]) => [key, frames(`assets/enemies/courtyard_guard/${key}`, `courtyard_guard_${key}`, count)])),
   boss: {
     master: image('assets/bosses/oro/reference/oro_master_no_cross.png'),
-    ...Object.fromEntries(Object.entries({ idle: 4, core_closed: 4, core_open: 4, ring_blade_attack: 6, wind_bullet_attack: 6, scan_beam: 6, dash: 6, phase_change: 6, hurt: 4, death: 8 }).map(([key, count]) => [key, frames(`assets/bosses/oro/${key}`, `oro_${key}`, count)])),
   },
   fx: {
     slash: frames('assets/fx/player/slash_arc', 'slash_arc', 4, false),
