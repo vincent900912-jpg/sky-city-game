@@ -35,6 +35,8 @@ export class UI {
       `Checkpoint ${game.activeCheckpointId || 'none'}  save ${game.checkpoint.x}/${game.checkpoint.y}`,
       `Arena ${game.arenaPlatforms.debugSummary()}`,
       `Arena sync ${game.arenaPlatforms.syncIssues().length ? 'ERROR ' + game.arenaPlatforms.syncIssues().map((item) => item.id).join(',') : 'OK'}`,
+      `Audio unlocked ${game.audio.debugState().unlocked}  muted ${game.audio.debugState().muted}  master ${game.audio.debugState().master.toFixed(2)}  music ${game.audio.debugState().music}`,
+      `Audio loops ${game.audio.debugState().activeLoops.join(',') || 'none'}  last SFX ${game.audio.debugState().lastSfx}`,
     ].join('\n');
   }
   updateEnemyBars(game) {
@@ -61,6 +63,18 @@ export class UI {
       if (editable) { key.dataset.binding = action; key.addEventListener('click', () => this.captureBinding(input, action, key)); }
       list.append(label, key);
     }
+  }
+  renderAudioSettings(audio) {
+    const root = document.getElementById('audio-controls'); if (!root) return; root.replaceChildren();
+    const fields = [['master', '主音量'], ['music', '音樂'], ['sfx', '音效'], ['ambience', '環境音']];
+    for (const [key, labelText] of fields) {
+      const row = document.createElement('label'); row.className = 'audio-control'; const label = document.createElement('span'); label.textContent = labelText;
+      const slider = document.createElement('input'); slider.type = 'range'; slider.min = '0'; slider.max = '100'; slider.step = '1'; slider.value = String(Math.round(audio.settings[key] * 100)); slider.dataset.audio = key;
+      const value = document.createElement('span'); value.className = 'audio-value'; value.textContent = slider.value;
+      slider.addEventListener('input', () => { value.textContent = slider.value; audio.updateSettings({ [key]: Number(slider.value) / 100 }); });
+      slider.addEventListener('change', () => audio.playSfx('ui_confirm', { ui: true, volume: .55 })); row.append(label, slider, value); root.append(row);
+    }
+    const muted = document.getElementById('audio-muted'); muted.checked = audio.settings.muted; muted.onchange = () => audio.updateSettings({ muted: muted.checked });
   }
   captureBinding(input, action, button) {
     document.querySelectorAll('.binding-key.capturing').forEach((node) => node.classList.remove('capturing')); button.classList.add('capturing'); button.textContent = '請按新按鍵…';

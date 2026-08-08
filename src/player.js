@@ -27,7 +27,7 @@ export class Player {
     this.grounded = false; this.wasGrounded = false; this.anim = 'idle'; this.animTime = 0; this.lockTimer = 0;
     this.attackTimer = 0; this.attackStage = 0; this.comboWindow = 0; this.attackId = 0; this.attackHit = new Set();
     this.invulnerable = .75; this.spawnGrace = .75; this.dashAvailable = true; this.dashTimer = 0; this.dead = false; this.deathTimer = 0;
-    this.crouching = false; this.attackFxSpawned = false;
+    this.crouching = false; this.attackFxSpawned = false; this.stepTimer = 0;
     this.jumpGrace = 0;
   }
   hitbox() { const h = this.crouching ? 25 : 42; return { x: this.x - 8, y: this.y - h, w: 16, h }; }
@@ -62,7 +62,8 @@ export class Player {
     this.hp = Math.max(0, this.hp - amount); this.hurtCount += 1; this.invulnerable = 1.05; this.spawnGrace = 0;
     this.vx = this.x < sourceX ? -105 : 105; this.vy = -120; this.lockTimer = 0.3; this.setAnim('hurt');
     game.addFx('impact', this.x, this.y - 28, 0.28);
-    if (this.hp <= 0) { this.dead = true; this.deathTimer = 1.1; this.setAnim('death'); }
+    game.audio.playSfx('player_hurt', { x: this.x });
+    if (this.hp <= 0) { this.dead = true; this.deathTimer = 1.1; this.setAnim('death'); game.audio.playSfx('player_death', { x: this.x }); }
     return true;
   }
   update(dt, game) {
@@ -73,21 +74,26 @@ export class Player {
       this.attackTimer = Math.max(0, this.attackTimer - dt);
       if (this.attackTimer === 0 && this.attackStage) this.comboWindow = 0.35;
     }
-    this.crouching = this.grounded && input.isDown('crouch') && this.lockTimer <= 0 && !this.attackTimer;
+    const wasCrouching = this.crouching; this.crouching = this.grounded && input.isDown('crouch') && this.lockTimer <= 0 && !this.attackTimer;
+    if (this.crouching !== wasCrouching) game.audio.playSfx(this.crouching ? 'player_crouch' : 'player_stand', { x: this.x });
     if (input.wasPressed('attack') && !this.crouching) {
       if (!this.grounded && !this.attackTimer) this.beginAttack(true);
       else if (this.grounded && (!this.attackTimer || this.attackTimer < 0.08)) this.beginAttack(false);
     }
     if (input.wasPressed('skill') && this.energy >= 25 && !this.attackTimer && this.lockTimer <= 0) {
       this.energy -= 25; this.lockTimer = 0.34; this.setAnim('wind_pulse');
+      game.audio.playSfx('wind_pulse_charge', { x: this.x });
       game.spawnProjectile({ type: 'windPulse', team: 'player', x: this.x + this.facing * 16, y: this.y - 29, vx: this.facing * 190, vy: 0, w: 26, h: 14, damage: 3, life: 0.9, pierce: true });
+      game.audio.playSfx('wind_pulse_fire', { x: this.x + this.facing * 16 });
     }
     if (input.wasPressed('dash') && !this.grounded && this.dashAvailable && this.lockTimer <= 0) {
       this.dashAvailable = false; this.dashTimer = 0.2; this.invulnerable = Math.max(this.invulnerable, 0.2); this.vx = this.facing * 240; this.vy = input.isDown('jump') ? -80 : 0; this.setAnim('air_dash');
       game.addFx('dash', this.x - this.facing * 18, this.y - 32, 0.25, this.facing);
+      game.audio.playSfx('player_dash', { x: this.x });
     }
     if (this.attackTimer && this.isAttackActive() && !this.attackFxSpawned) {
       this.attackFxSpawned = true; const origin = this.attackFxOrigin(); game.addFx('slash', origin.x, origin.y, this.attackStage === 3 ? 0.31 : 0.24, this.facing, { stage: this.attackStage });
+      game.audio.playSfx(this.attackStage === 0 ? 'air_attack_swing' : `attack_${this.attackStage}_swing`, { x: origin.x });
     }
     const tappedAxis = (input.wasPressed('right') ? 1 : 0) - (input.wasPressed('left') ? 1 : 0); const axis = this.crouching ? 0 : (input.axis() || tappedAxis);
     if (this.lockTimer <= 0 && this.dashTimer <= 0) {
@@ -95,7 +101,7 @@ export class Player {
       else this.vx -= Math.sign(this.vx) * Math.min(Math.abs(this.vx), (this.grounded ? 720 : 90) * dt);
       this.vx = clamp(this.vx, -105, 105);
     }
-    if (input.wasPressed('jump') && this.grounded && this.lockTimer <= 0) { this.crouching = false; this.vy = -270; this.grounded = false; this.jumpGrace = .14; this.setAnim('jump_rising'); }
+    if (input.wasPressed('jump') && this.grounded && this.lockTimer <= 0) { this.crouching = false; this.vy = -270; this.grounded = false; this.jumpGrace = .14; this.setAnim('jump_rising'); game.audio.playSfx('player_jump', { x: this.x }); }
     if (input.wasReleased('jump') && this.jumpGrace <= 0 && this.vy < -90) this.vy *= .52;
     this.dashTimer = Math.max(0, this.dashTimer - dt);
     if (this.dashTimer <= 0) this.vy += 720 * dt;
@@ -103,7 +109,7 @@ export class Player {
     this.vy = Math.min(this.vy, 360);
     this.wasGrounded = this.grounded;
     moveBody(this, dt, game.solids(), game.oneWays());
-    if (this.grounded) { this.dashAvailable = true; if (!this.wasGrounded && this.vy === 0) { this.setAnim('landing'); this.lockTimer = Math.max(this.lockTimer, 0.29); } }
+    if (this.grounded) { this.dashAvailable = true; if (!this.wasGrounded && this.vy === 0) { this.setAnim('landing'); this.lockTimer = Math.max(this.lockTimer, 0.29); game.audio.playSfx('player_land', { x: this.x }); } }
     if (this.y > 236 || game.hazards.some((hazard) => overlap(this.hitbox(), hazard))) { game.fallRespawn(); return; }
     const attack = this.attackBox();
     if (attack) game.resolvePlayerAttack(attack, this);
@@ -113,6 +119,7 @@ export class Player {
       else if (Math.abs(this.vx) > 10) this.setAnim('run');
       else this.setAnim('idle');
     }
+    this.stepTimer = Math.max(0, this.stepTimer - dt); if (this.grounded && !this.crouching && !this.attackTimer && Math.abs(this.vx) > 45 && this.stepTimer <= 0) { game.audio.playSfx('player_step', { x: this.x }); this.stepTimer = .27; }
     this.x = clamp(this.x, 10, game.worldWidth - 10);
   }
   render(ctx, game) {

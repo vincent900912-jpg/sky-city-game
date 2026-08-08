@@ -14,53 +14,66 @@ export class OroBoss {
   corePoint() { return { x: this.x, y: this.y - 60 }; }
   emitterPoint() { return { x: this.x + this.facing * 8, y: this.y - 60 }; }
   ringSockets() { return [{ x: this.x - 43, y: this.y - 60 }, { x: this.x + 43, y: this.y - 60 }]; }
-  activate() { if (this.active || this.dead) return; this.active = true; this.x = clamp(this.spawnX, ARENA.hoverMin, ARENA.hoverMax); this.y = this.spawnY; this.state = 'intro'; this.stateTime = 1; this.animTime = 0; }
-  setState(state, duration) { this.state = state; this.stateTime = duration; this.animTime = 0; this.spawnFlags.clear(); }
+  activate(game) { if (this.active || this.dead) return; this.active = true; this.x = clamp(this.spawnX, ARENA.hoverMin, ARENA.hoverMax); this.y = this.spawnY; this.state = 'intro'; this.stateTime = 1; this.animTime = 0; game?.audio.playSfx('oro_intro', { x: this.x }); }
+  setState(state, duration, game) {
+    const previous = this.state; this.state = state; this.stateTime = duration; this.animTime = 0; this.spawnFlags.clear();
+    if (!game) return;
+    if (previous === 'core_open' && state !== 'core_open') game.audio.playSfx('oro_core_close', { x: this.x });
+    if (previous === 'beam' && state !== 'beam') game.audio.playSfx('oro_scan_beam_end', { x: this.x });
+    if (previous === 'dash' && state !== 'dash') game.audio.playSfx('oro_dash_stop', { x: this.x });
+    if (state === 'core_open') game.audio.playSfx('oro_core_open', { x: this.x });
+  }
   takeDamage(amount, sourceX, game) {
     if (!this.active || this.dead || this.invulnerable > 0 || ['intro', 'phase_change'].includes(this.state)) return false;
     const vulnerable = this.state === 'core_open'; const actual = vulnerable ? amount * 2 : Math.max(0.5, amount * 0.3);
-    this.hp = Math.max(0, this.hp - actual); this.invulnerable = 0.08; game.addFx('hit', this.x, this.y - 60, 0.22); game.hitStop = Math.max(game.hitStop, 0.035);
-    if (this.hp <= 0) { this.dead = true; this.setState('death', 1.45); game.clearBossThreats(); }
+    this.hp = Math.max(0, this.hp - actual); this.invulnerable = 0.08; game.addFx('hit', this.x, this.y - 60, 0.22); game.hitStop = Math.max(game.hitStop, 0.035); game.audio.playSfx('oro_hurt', { x: this.x });
+    if (this.hp <= 0) { this.dead = true; this.setState('death', 1.45, game); game.clearBossThreats(); game.audio.stopLoop('boss:oro:idle'); game.audio.playSfx('oro_death', { x: this.x }); }
     return true;
   }
-  beginAttack() {
+  beginAttack(game) {
     const sequence = this.phase === 1 ? ['ring', 'bullets', 'beam'] : ['dash', 'bullets', 'ring', 'beam'];
     const attack = sequence[this.attackIndex % sequence.length]; this.attackIndex += 1;
-    this.setState(attack, { ring: 1.35, bullets: 1.45, beam: 1.35, dash: 1.2 }[attack]);
+    this.setState(attack, { ring: 1.35, bullets: 1.45, beam: 1.35, dash: 1.2 }[attack], game);
+    const cues = { ring: ['oro_ring_charge'], bullets: ['oro_bullet_charge'], beam: ['oro_scan_warning', 'oro_scan_charge'], dash: ['oro_dash_warning', 'oro_dash_charge'] };
+    cues[attack].forEach((id) => game.audio.playSfx(id, { x: this.x }));
   }
   update(dt, game) {
     if (!this.active && !this.dead) return;
     this.animTime += dt; this.invulnerable = Math.max(0, this.invulnerable - dt); this.facing = game.player.x < this.x ? -1 : 1;
+    if (!this.dead) game.audio.startLoop('oro_idle_loop', 'boss:oro:idle', { x: this.x });
     if (this.dead) { this.stateTime -= dt; if (this.stateTime <= 0 && !this.finished) { this.finished = true; game.finishBoss(); } return; }
     if (this.phase === 1 && this.hp <= this.maxHp * 0.5) {
-      this.phase = 2; this.setState('phase_change', 1.55); game.clearBossThreats(); game.beginPhaseTwoCollapse(); game.addFx('phase', this.x, this.y - 60, 1.25); return;
+      this.phase = 2; this.setState('phase_change', 1.55, game); game.clearBossThreats(); game.beginPhaseTwoCollapse(); game.addFx('phase', this.x, this.y - 60, 1.25); game.audio.playSfx('oro_phase_change', { x: this.x }); return;
     }
     this.stateTime -= dt; const elapsed = this.elapsed();
-    if (this.state === 'intro') { if (this.stateTime <= 0) this.setState('cooldown', .4); return; }
-    if (this.state === 'phase_change') { if (this.stateTime <= 0) { game.phaseTwo = true; this.setState('cooldown', .45); } return; }
-    if (this.state === 'cooldown') { if (this.stateTime <= 0) this.beginAttack(); return; }
+    if (this.state === 'intro') { if (this.stateTime <= 0) this.setState('cooldown', .4, game); return; }
+    if (this.state === 'phase_change') { if (this.stateTime <= 0) { game.phaseTwo = true; this.setState('cooldown', .45, game); } return; }
+    if (this.state === 'cooldown') { if (this.stateTime <= 0) this.beginAttack(game); return; }
     const emitter = this.emitterPoint();
     if (this.state === 'ring' && elapsed > 0.62 && !this.spawnFlags.has('ring')) {
       this.spawnFlags.add('ring'); const direction = game.player.x < this.x ? -1 : 1;
       this.ringSockets().forEach((socket, socketIndex) => { const outward = socketIndex ? 1 : -1; game.spawnProjectile({ type: 'ring', team: 'enemy', sourceX: socket.x, sourceY: socket.y, socketIndex, x: socket.x, y: socket.y, vx: outward * 120, vy: outward * 22, targetDirection: direction, outwardUntil: .22, w: 24, h: 24, damage: 1, life: 1.8, returnAt: .82 }); });
+      game.audio.playSfx('oro_ring_detach', { x: this.x }); game.audio.playSfx('oro_ring_spin_loop', { x: this.x });
     } else if (this.state === 'bullets') {
       for (let index = 0; index < 3; index += 1) if (elapsed > 0.55 + index * 0.18 && !this.spawnFlags.has(`bullet${index}`)) {
         this.spawnFlags.add(`bullet${index}`); const dx = game.player.x - emitter.x; const dy = game.player.y - 30 - emitter.y; const length = Math.hypot(dx, dy) || 1; const spread = (index - 1) * 0.12;
         game.spawnProjectile({ type: 'bossBullet', team: 'enemy', reflectable: true, sourceX: emitter.x, sourceY: emitter.y, x: emitter.x, y: emitter.y, vx: dx / length * 92, vy: dy / length * 92 + spread * 92, w: 16, h: 16, damage: 1, life: 4 });
+        game.audio.playSfx('oro_bullet_fire', { x: emitter.x }); game.audio.playSfx('oro_bullet_fly', { x: emitter.x, volume: .75 });
       }
     } else if (this.state === 'beam' && elapsed > 0.62 && !this.spawnFlags.has('beam')) {
-      this.spawnFlags.add('beam'); game.spawnProjectile({ type: 'beam', team: 'enemy', sourceX: emitter.x, sourceY: emitter.y, x: (ARENA.left + ARENA.right) / 2, y: 163, vx: 0, vy: 0, w: ARENA.right - ARENA.left - 28, h: 10, damage: 1, life: 0.58, static: true });
+      this.spawnFlags.add('beam'); game.spawnProjectile({ type: 'beam', team: 'enemy', sourceX: emitter.x, sourceY: emitter.y, x: (ARENA.left + ARENA.right) / 2, y: 163, vx: 0, vy: 0, w: ARENA.right - ARENA.left - 28, h: 10, damage: 1, life: 0.58, static: true }); game.audio.playSfx('oro_scan_beam_loop', { x: emitter.x });
     } else if (this.state === 'dash' && elapsed > 0.58) {
       if (!this.spawnFlags.has('dash')) {
         this.spawnFlags.add('dash'); this.dashTarget = this.x > (ARENA.hoverMin + ARENA.hoverMax) / 2 ? ARENA.hoverMin : ARENA.hoverMax;
         game.addFx('dash', this.x, this.y - 56, 0.4, Math.sign(this.dashTarget - this.x));
+        game.audio.playSfx('oro_dash_move', { x: this.x });
       }
       const delta = this.dashTarget - this.x; this.x += Math.sign(delta) * Math.min(Math.abs(delta), 300 * dt);
       if (Math.abs(delta) < 1) this.stateTime = 0; if (overlap(this.hitbox(), game.player.hurtbox())) game.player.takeDamage(2, this.x, game);
     }
     if (this.stateTime <= 0) {
-      if (['ring', 'bullets', 'beam', 'dash'].includes(this.state)) this.setState('core_open', this.phase === 1 ? 1.55 : 1.25);
-      else if (this.state === 'core_open') this.setState('cooldown', .35);
+      if (['ring', 'bullets', 'beam', 'dash'].includes(this.state)) this.setState('core_open', this.phase === 1 ? 1.55 : 1.25, game);
+      else if (this.state === 'core_open') this.setState('cooldown', .35, game);
     }
     this.x = clamp(this.x, ARENA.hoverMin, ARENA.hoverMax);
   }

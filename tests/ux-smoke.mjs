@@ -10,6 +10,7 @@ import { ArenaPlatformManager, ARENA_BREAK_TIMING } from '../src/platforms.js';
 import { MANIFEST } from '../src/assets.js';
 
 const root = new URL('../', import.meta.url);
+const audioStub = { playSfx() {}, playMusic() {}, stopMusic() {}, startLoop() {}, stopLoop() {}, stopLoops() {}, setListenerX() {}, setPaused() {}, debugState: () => ({ unlocked: false, muted: false, master: 1, music: 'none', activeLoops: [], lastSfx: 'none' }) };
 const collision = JSON.parse(await readFile(new URL('assets/levels/level_01_cloud_gate/data/collision.json', root), 'utf8'));
 const objects = JSON.parse(await readFile(new URL('assets/levels/level_01_cloud_gate/data/objects.json', root), 'utf8'));
 const hooks = JSON.parse(await readFile(new URL('assets/levels/level_01_cloud_gate/data/scene-hooks.json', root), 'utf8'));
@@ -45,7 +46,7 @@ arenaPlatforms.reset(); assert.equal(arenaPlatforms.center().state, 'intact', 'r
 const simulateJump = (start, targetId) => {
   let firstFrame = true;
   const input = { axis: () => 1, wasPressed: (action) => action === 'jump' && firstFrame, wasReleased: () => false, isDown: () => false };
-  const game = { input, worldWidth: 1152, hazards: collision.hazards, solids: () => collision.solids, oneWays: () => collision.one_way_platforms, addFx() {}, spawnProjectile() {}, resolvePlayerAttack() {}, fallRespawn() {}, showGameOver() {} };
+  const game = { input, audio: audioStub, worldWidth: 1152, hazards: collision.hazards, solids: () => collision.solids, oneWays: () => collision.one_way_platforms, addFx() {}, spawnProjectile() {}, resolvePlayerAttack() {}, fallRespawn() {}, showGameOver() {} };
   const actor = new Player({ ...start, facing: 'right' }); actor.grounded = true;
   for (let frame = 0; frame < 120; frame += 1) { actor.update(1 / 60, game); firstFrame = false; if (actor.grounded && Math.abs(actor.y - collision.one_way_platforms.find((item) => item.id === targetId).y) < .1) return true; }
   return false;
@@ -53,7 +54,7 @@ const simulateJump = (start, targetId) => {
 assert(simulateJump({ x: 100, y: 184 }, 'thin_01'), 'ordinary jump cannot reach thin_01');
 assert(simulateJump({ x: 382, y: 184 }, 'moving_01'), 'ordinary jump cannot reach moving_01 at its low position');
 assert(simulateJump({ x: 535, y: 148 }, 'thin_02'), 'moving-platform route cannot reach thin_02');
-let tapFrame = true; const tapJumpGame = { input: { axis: () => 1, wasPressed: (action) => action === 'jump' && tapFrame, wasReleased: (action) => action === 'jump' && tapFrame, isDown: () => false }, worldWidth: 1152, hazards: collision.hazards, solids: () => collision.solids, oneWays: () => collision.one_way_platforms, addFx() {}, spawnProjectile() {}, resolvePlayerAttack() {}, fallRespawn() { this.fell = true; }, showGameOver() {} };
+let tapFrame = true; const tapJumpGame = { input: { axis: () => 1, wasPressed: (action) => action === 'jump' && tapFrame, wasReleased: (action) => action === 'jump' && tapFrame, isDown: () => false }, audio: audioStub, worldWidth: 1152, hazards: collision.hazards, solids: () => collision.solids, oneWays: () => collision.one_way_platforms, addFx() {}, spawnProjectile() {}, resolvePlayerAttack() {}, fallRespawn() { this.fell = true; }, showGameOver() {} };
 const tapJumper = new Player({ x: 282, y: 184, facing: 'right' }); tapJumper.grounded = true; tapJumper.vx = 60;
 for (let frame = 0; frame < 90; frame += 1) { tapJumper.update(1 / 60, tapJumpGame); tapFrame = false; if (tapJumper.grounded && tapJumper.x > 340) break; }
 assert.equal(tapJumpGame.fell, undefined, 'minimum W tap falls into the first required gap'); assert(tapJumper.x > 340 && tapJumper.grounded, 'minimum W tap cannot clear the first required gap');
@@ -65,7 +66,7 @@ assert.equal(MANIFEST.player.crouch.length, 1, 'crouch must hold one stable low 
 assert.equal(MANIFEST.boss.master.path.endsWith('oro_master_no_cross.png'), true, 'runtime boss master still points at the crossed-marker art');
 const crouchActor = new Player({ x: 80, y: 184, facing: 'right' }); crouchActor.grounded = true;
 let crouchJump = false;
-const crouchGame = { input: { axis: () => 1, wasPressed: (action) => action === 'jump' && crouchJump, wasReleased: () => false, isDown: (action) => action === 'crouch' }, worldWidth: 1152, hazards: [], solids: () => collision.solids, oneWays: () => [], addFx() {}, spawnProjectile() {}, resolvePlayerAttack() {}, fallRespawn() {}, showGameOver() {} };
+const crouchGame = { input: { axis: () => 1, wasPressed: (action) => action === 'jump' && crouchJump, wasReleased: () => false, isDown: (action) => action === 'crouch' }, audio: audioStub, worldWidth: 1152, hazards: [], solids: () => collision.solids, oneWays: () => [], addFx() {}, spawnProjectile() {}, resolvePlayerAttack() {}, fallRespawn() {}, showGameOver() {} };
 crouchActor.update(1 / 60, crouchGame);
 assert.equal(crouchActor.crouching, true, 'grounded S should enter crouch');
 assert.equal(crouchActor.hurtbox().h, 22, 'crouch hurtbox should be shorter');
@@ -82,7 +83,7 @@ player.y = 150; player.grounded = false; player.attackStage = 0; player.attackTi
 assert(overlap(player.attackBox(), scout.hitbox()), 'air attack should reliably overlap the flying scout hurtbox');
 
 const spawned = [];
-const fakeGame = { player: { x: 820, y: 176, hurtbox: () => ({ x: 812, y: 134, w: 16, h: 42 }), takeDamage: () => false }, spawnProjectile: (item) => spawned.push(item), clearBossThreats() {}, addFx() {}, phaseTwo: false, finishBoss() {}, hitStop: 0 };
+const fakeGame = { player: { x: 820, y: 176, hurtbox: () => ({ x: 812, y: 134, w: 16, h: 42 }), takeDamage: () => false }, audio: audioStub, spawnProjectile: (item) => spawned.push(item), clearBossThreats() {}, addFx() {}, phaseTwo: false, finishBoss() {}, hitStop: 0 };
 const boss = new OroBoss(objects.enemy_spawns.find((item) => item.enemy === 'oro'));
 boss.active = true; boss.state = 'beam'; boss.stateTime = .72; boss.update(1 / 60, fakeGame);
 assert.equal(spawned.length, 1, 'beam should spawn once');
@@ -123,6 +124,17 @@ for (const entry of manifestEntries) {
   assert(!entry.path.startsWith('/'), `GitHub Pages asset path must be relative: ${entry.path}`);
   await readFile(new URL(entry.path, root));
 }
+const audioManifest = JSON.parse(await readFile(new URL('assets/audio/audio-manifest.json', root), 'utf8'));
+const requiredAudio = ['music_opening', 'music_menu', 'music_intro', 'music_level_01', 'music_boss_oro', 'music_victory', 'player_jump', 'attack_1_swing', 'wind_scout_charge', 'guard_wall_hit', 'oro_ring_charge', 'oro_scan_warning', 'oro_phase_change', 'checkpoint_saved'];
+for (const id of requiredAudio) assert(audioManifest.sounds[id], `audio manifest missing ${id}`);
+for (const [id, entry] of Object.entries(audioManifest.sounds)) {
+  assert(entry.volume >= 0 && entry.volume <= 1, `${id} volume is outside 0..1`);
+  assert(Array.isArray(entry.paths) && entry.paths.length > 0, `${id} has no audio path`);
+  for (const path of entry.paths) { const data = await readFile(new URL(path, root)); assert.equal(data.subarray(0, 4).toString(), 'RIFF', `${path} is not a WAV file`); assert.equal(data.subarray(8, 12).toString(), 'WAVE', `${path} has an invalid WAV header`); }
+  if (entry.loop) assert(['music', 'sfx', 'ambience'].includes(entry.category), `${id} loop has no manageable category`);
+}
+const audioSources = await Promise.all(['src/game.js', 'src/player.js', 'src/enemies.js', 'src/boss.js', 'src/ui.js'].map((path) => readFile(new URL(path, root), 'utf8')));
+for (const source of audioSources) for (const match of source.matchAll(/(?:playSfx|playMusic|startLoop)\('([^']+)'/g)) assert(audioManifest.sounds[match[1]], `code references unknown sound id ${match[1]}`);
 const indexHtml = await readFile(new URL('index.html', root), 'utf8');
 assert(!/(?:src|href)=["']\//.test(indexHtml), 'index.html contains a site-root asset path');
 assert(!/(?:localhost|127\.0\.0\.1|file:\/\/\/|C:\\Users\\|C:\/Users\/)/i.test(indexHtml), 'index.html contains a local-only URL');
