@@ -49,7 +49,7 @@ export class FlowController {
     this.opening.addEventListener('pointerdown', () => this.skipOpening());
     document.querySelectorAll('[data-flow]').forEach((button) => button.addEventListener('click', () => this.command(button.dataset.flow)));
     document.getElementById('story-next').addEventListener('click', () => this.nextStory()); document.getElementById('story-skip').addEventListener('click', () => this.requestSkipStory());
-    this.story.addEventListener('pointerdown', (event) => { if (['story-art', 'story-pan', 'story-vignette'].includes(event.target.id) || event.target.classList.contains('story-vignette')) { this.game.audio.playSfx('ui_confirm', { ui: true, volume: .55 }); this.nextStory(); } });
+    this.story.addEventListener('pointerdown', (event) => { if (['story-art', 'story-pan', 'story-vignette'].includes(event.target.id) || event.target.classList.contains('story-vignette')) this.nextStory(); });
     document.addEventListener('keydown', (event) => {
       if (this.game.state === STATES.OPENING) { event.preventDefault(); this.skipOpening(); }
       else if (this.game.state === STATES.INTRO_STORY && !this.confirming && ['Space', 'Enter'].includes(event.code)) { event.preventDefault(); this.nextStory(); }
@@ -61,7 +61,7 @@ export class FlowController {
   }
   showOnly(element) { [this.opening, this.menu, this.story, this.chapter].forEach((node) => { node.hidden = node !== element; }); }
   async transition(work) { this.fade.classList.add('active'); await new Promise((resolve) => setTimeout(resolve, 360)); work(); await new Promise((resolve) => setTimeout(resolve, 50)); this.fade.classList.remove('active'); }
-  skipOpening() { if (this.game.state !== STATES.OPENING) return; clearTimeout(this.openingTimer); this.game.audio.playSfx('ui_confirm', { ui: true }); this.showMenu(); }
+  skipOpening() { if (this.game.state !== STATES.OPENING) return; clearTimeout(this.openingTimer); this.showMenu(); }
   showMenu() {
     if (this.game.state === STATES.MAIN_MENU && !this.menu.hidden) return; clearTimeout(this.openingTimer); this.game.setState(STATES.MAIN_MENU); this.transition(() => { this.game.prepareMainMenu(); this.showOnly(this.menu); this.refreshMenu(); });
   }

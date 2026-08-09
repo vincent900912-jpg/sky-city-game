@@ -5,7 +5,6 @@ __pycache__/
 Thumbs.db
 node_modules/
 .vscode/
-.vs/
 .idea/
 *.log
 
