@@ -54,13 +54,8 @@ export class AudioManager {
   }
   async fetchRaw(path) {
     if (this.raw.has(path)) return this.raw.get(path);
-    let response;
-    for (let attempt = 1; attempt <= 3; attempt += 1) {
-      response = await fetch(path, { cache: attempt === 1 ? 'default' : 'no-store' }).catch(() => null);
-      if (response?.ok) break;
-      await new Promise((resolve) => setTimeout(resolve, attempt * 180));
-    }
-    if (!response?.ok) throw new Error(`${path} (HTTP ${response?.status || 'network'})`);
+    const response = await fetch(path);
+    if (!response.ok) throw new Error(`${path} (HTTP ${response.status})`);
     const data = await response.arrayBuffer(); this.raw.set(path, data); return data;
   }
   async loadBuffer(path) {
@@ -79,9 +74,7 @@ export class AudioManager {
   }
   async preloadGroup(group) {
     const paths = Object.values(this.manifest).filter((entry) => entry.preload === group).flatMap((entry) => entry.paths || []);
-    let cursor = 0;
-    const worker = async () => { while (cursor < paths.length) { const path = paths[cursor]; cursor += 1; await this.fetchRaw(path).catch((error) => console.warn('[audio] Preload failed:', path, error)); } };
-    await Promise.all(Array.from({ length: Math.min(6, paths.length) }, worker));
+    await Promise.all(paths.map((path) => this.fetchRaw(path).catch((error) => console.warn('[audio] Preload failed:', path, error))));
     if (this.unlocked) await this.decodePreloaded();
   }
   entry(id) {
